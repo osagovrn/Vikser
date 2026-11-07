@@ -2,8 +2,9 @@
 // (GitHub Pages, обычный виртуальный хостинг с загрузкой файлов по FTP).
 //
 // Запускается после `vite build --mode static`.
-// Домен берётся из VITE_SITE_URL (или SITE_URL); без него метаданные будут
-// указывать на example.com, поэтому для боевой сборки переменную нужно задать.
+//
+// VITE_SITE_URL — адрес, на котором будет открываться сайт (для canonical и sitemap).
+// VITE_BASE_PATH — подпапка, если сайт живёт не в корне домена (GitHub Pages без своего домена).
 
 import { cp, mkdir, readdir, rm, writeFile, readFile, rename } from "node:fs/promises";
 import { existsSync } from "node:fs";
@@ -18,13 +19,16 @@ const rawDomain = (process.env.VITE_SITE_URL || process.env.SITE_URL || "").trim
 const siteUrl = (rawDomain || "https://example.com").replace(/\/+$/, "");
 const isPlaceholder = !rawDomain;
 
+const basePath = (process.env.VITE_BASE_PATH || "/").replace(/\/?$/, "/");
+const baseNoSlash = basePath.replace(/\/$/, "");
+
 const PAGES = [
   { path: "/", priority: "1.0" },
   { path: "/privacy", priority: "0.3" },
 ];
 
-if (!existsSync(join(src, "index.html"))) {
-  console.error("Нет .vercel/output/static/index.html — сначала выполните: vite build --mode static");
+if (!existsSync(join(src, "index.html")) && !existsSync(join(src, baseNoSlash, "index.html"))) {
+  console.error("Нет готовых HTML — сначала выполните: vite build --mode static");
   process.exit(1);
 }
 
@@ -32,7 +36,19 @@ await rm(out, { recursive: true, force: true });
 await mkdir(out, { recursive: true });
 await cp(src, out, { recursive: true });
 
-// 404.html: GitHub Pages отдаёт его на несуществующие адреса
+// Если сборка сделана под подпапку (base = /Vikser/), нитро кладёт HTML в <base>/.
+// Хостинг сам отдаёт содержимое dist-static из этой подпапки, поэтому поднимаем файлы в корень.
+if (baseNoSlash) {
+  const nested = join(out, ...baseNoSlash.split("/").filter(Boolean));
+  if (existsSync(join(nested, "index.html"))) {
+    for (const entry of await readdir(nested)) {
+      await rename(join(nested, entry), join(out, entry));
+    }
+    await rm(nested, { recursive: true, force: true });
+  }
+}
+
+// 404.html: GitHub Pages и обычные хостинги отдают его на несуществующие адреса
 const notFoundDir = join(out, "404");
 if (existsSync(join(notFoundDir, "index.html"))) {
   await rename(join(notFoundDir, "index.html"), join(out, "404.html"));
@@ -71,7 +87,7 @@ ${urls}
 `,
 );
 
-// Проверка: все абсолютные ссылки из HTML должны существовать в сборке
+// Проверка: все ссылки из HTML должны существовать в сборке
 const htmlFiles = [];
 async function walk(dir) {
   for (const entry of await readdir(dir, { withFileTypes: true })) {
@@ -86,18 +102,19 @@ const missing = new Set();
 for (const file of htmlFiles) {
   const html = await readFile(file, "utf8");
   for (const match of html.matchAll(/(?:href|src)="(\/[^"]*)"/g)) {
-    const ref = match[1];
+    let ref = match[1];
     if (ref.startsWith("//")) continue;
+    if (baseNoSlash && ref.startsWith(basePath)) ref = ref.slice(baseNoSlash.length) || "/";
     const target = join(out, decodeURIComponent(ref.split("?")[0]));
     const asDir = join(target, "index.html");
     if (!existsSync(target) && !existsSync(asDir)) missing.add(ref);
   }
 }
 
-const size = (await readdir(out, { recursive: true })).length;
-console.log(`dist-static: ${size} файлов, домен ${siteUrl}${isPlaceholder ? " (ЗАГЛУШКА)" : ""}`);
+const count = (await readdir(out, { recursive: true })).length;
+console.log(`dist-static: ${count} файлов, адрес ${siteUrl}${isPlaceholder ? " (ЗАГЛУШКА)" : ""}`);
 if (isPlaceholder) {
-  console.log("! VITE_SITE_URL не задан: canonical, sitemap и CNAME указывают на example.com");
+  console.log("! VITE_SITE_URL не задан: canonical и sitemap указывают на example.com");
 }
 if (missing.size) {
   console.error("битые ссылки в HTML:", [...missing].join(", "));

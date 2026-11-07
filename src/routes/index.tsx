@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import { reachGoal } from "@/lib/analytics";
@@ -836,7 +836,7 @@ function Home() {
               </div>
             </dl>
             <p className="privacy-more">
-              Полный текст — <a href="/privacy">политика обработки персональных данных</a>.
+              Полный текст — <Link to="/privacy">политика обработки персональных данных</Link>.
             </p>
           </div>
         </section>
@@ -888,7 +888,7 @@ function Home() {
                 <a href="#map">Как добраться</a>
               </li>
               <li>
-                <a href="/privacy">Политика конфиденциальности</a>
+                <Link to="/privacy">Политика конфиденциальности</Link>
               </li>
               <li>
                 <a href="#contacts">Контакты</a>
@@ -931,7 +931,7 @@ function Home() {
         </div>
         <div className="shell legal">
           <span suppressHydrationWarning>© {YEAR} ООО «Фирма Виксер»</span>
-          <a href="/privacy">Политика конфиденциальности</a>
+          <Link to="/privacy">Политика конфиденциальности</Link>
         </div>
       </footer>
 
@@ -1105,9 +1105,9 @@ function QuoteForm({
         <input name="consent" type="checkbox" required />
         <span>
           Согласен на обработку персональных данных согласно{" "}
-          <a href="/privacy" target="_blank" rel="noreferrer">
+          <Link to="/privacy" target="_blank" rel="noreferrer">
             политике
-          </a>
+          </Link>
         </span>
       </label>
       {done && compact ? (

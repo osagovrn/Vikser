@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { abs } from "@/lib/site";
 
 const UPDATED = "7 ноября 2026 года";
@@ -26,9 +26,9 @@ function Privacy() {
   return (
     <main className="doc">
       <div className="shell doc-inner">
-        <a className="doc-back" href="/">
+        <Link className="doc-back" to="/">
           ← На главную
-        </a>
+        </Link>
         <h1>Политика обработки персональных данных</h1>
         <p className="doc-date">Редакция от {UPDATED}</p>
 
@@ -106,12 +106,12 @@ function Privacy() {
 
         <h2>10. Изменения политики</h2>
         <p>
-          Актуальная редакция всегда доступна по адресу <a href="/privacy">/privacy</a>. При
+          Актуальная редакция всегда доступна по адресу <Link to="/privacy">/privacy</Link>. При
           изменении порядка обработки данных мы обновляем дату редакции.
         </p>
 
         <p className="doc-foot">
-          <a href="/">← Вернуться на главную</a>
+          <Link to="/">← Вернуться на главную</Link>
         </p>
       </div>
     </main>
