@@ -36,5 +36,15 @@ export function originFromRequest(request: Request): string {
   return ENV_SITE_URL || new URL(request.url).origin;
 }
 
+/**
+ * Путь к файлу из public/ с учётом базового адреса сборки.
+ * Нужен, когда сайт публикуется в подпапке (например /Vikser/ на GitHub Pages):
+ * тогда "/img/logo.webp" превращается в "/Vikser/img/logo.webp", а на своём
+ * домене остаётся "/img/logo.webp".
+ */
+export function asset(path: string): string {
+  return `${import.meta.env.BASE_URL}${path.replace(/^\//, "")}`;
+}
+
 /** Идентификатор счётчика Яндекс.Метрики. Пока не задан — аналитика не грузится. */
 export const METRIKA_ID = (import.meta.env.VITE_METRIKA_ID as string | undefined)?.trim() || "";

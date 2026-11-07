@@ -2,8 +2,9 @@ import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-r
 import { useEffect, useState } from "react";
 import { NotFound } from "@/components/not-found";
 import { initAnalytics } from "@/lib/analytics";
-import { METRIKA_ID } from "@/lib/site";
+import { asset, METRIKA_ID } from "@/lib/site";
 import appCss from "../styles.css?url";
+import manropeCyrillic from "@/fonts/manrope-cyrillic.woff2?url";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -14,20 +15,20 @@ export const Route = createRootRoute({
       { name: "format-detection", content: "telephone=no" },
     ],
     links: [
-      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
-      { rel: "icon", type: "image/x-icon", href: "/favicon.ico", sizes: "32x32" },
-      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
-      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "icon", type: "image/svg+xml", href: asset("/favicon.svg") },
+      { rel: "icon", type: "image/x-icon", href: asset("/favicon.ico"), sizes: "32x32" },
+      { rel: "apple-touch-icon", href: asset("/apple-touch-icon.png") },
+      { rel: "manifest", href: asset("/manifest.webmanifest") },
       {
         rel: "preload",
-        href: "/fonts/manrope-cyrillic.woff2",
+        href: manropeCyrillic,
         as: "font",
         type: "font/woff2",
         crossOrigin: "anonymous",
       },
       {
         rel: "preload",
-        href: "/img/hero-night.webp",
+        href: asset("/img/hero-night.webp"),
         as: "image",
         type: "image/webp",
         fetchPriority: "high",

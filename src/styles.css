@@ -227,7 +227,7 @@
       rgba(5, 6, 10, 0.15) 48%,
       rgba(5, 6, 10, 0.35) 100%
     ),
-    url("/img/hero-night.webp") right center / cover no-repeat;
+    var(--hero-image, none) right center / cover no-repeat;
 }
 
 .hero-circuit {

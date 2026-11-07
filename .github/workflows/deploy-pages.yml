@@ -1,9 +1,9 @@
 name: Deploy to GitHub Pages
 
-# Публикация включается, когда в настройках репозитория задан домен сайта:
+# Пока свой домен не задан, сайт публикуется в подпапке репозитория:
+# GitHub отдаёт проектные сайты по адресу <домен аккаунта>/<репозиторий>/.
+# Когда домен куплен — задайте переменную SITE_URL, и сборка переедет в корень домена.
 # Settings → Secrets and variables → Actions → Variables → SITE_URL = https://ваш-домен.ru
-# Без домена сайт публиковать нельзя: GitHub отдаёт проектные сайты из подпапки
-# /<репозиторий>/, а сборка рассчитана на работу в корне домена.
 
 on:
   push:
@@ -21,7 +21,6 @@ concurrency:
 
 jobs:
   build:
-    if: vars.SITE_URL != ''
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -36,7 +35,8 @@ jobs:
 
       - name: Сборка статического сайта
         env:
-          VITE_SITE_URL: ${{ vars.SITE_URL }}
+          VITE_SITE_URL: ${{ vars.SITE_URL || 'https://yvwvy.ru/Vikser' }}
+          VITE_BASE_PATH: ${{ vars.SITE_URL && '/' || '/Vikser/' }}
         run: npm run build:static
 
       - name: Загрузка артефакта
@@ -46,7 +46,6 @@ jobs:
 
   deploy:
     needs: build
-    if: vars.SITE_URL != ''
     runs-on: ubuntu-latest
     environment:
       name: github-pages

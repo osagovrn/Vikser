@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { asset } from "@/lib/site";
 
 export function NotFound() {
   return (
@@ -11,7 +12,7 @@ export function NotFound() {
 
       <div className="nf-inner">
         <Link to="/" className="nf-brand" aria-label="ВИКСЕР, на главную">
-          <img src="/img/logo.webp" alt="ООО Фирма ВИКСЕР" width="840" height="660" />
+          <img src={asset("/img/logo-420.webp")} alt="ООО Фирма ВИКСЕР" width="420" height="330" />
         </Link>
 
         <div className="nf-screen" role="img" aria-label="Ошибка 404: сигнал потерян">

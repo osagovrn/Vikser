@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import { reachGoal } from "@/lib/analytics";
-import { abs } from "@/lib/site";
+import { abs, asset } from "@/lib/site";
 
 const FOUNDED = 1998;
 const YEAR = new Date().getFullYear();
@@ -393,7 +393,7 @@ function Home() {
       <header className="site-header">
         <div className="header-row">
           <a className="brand" href="#top">
-            <img src="/img/mark.webp" alt="" width="160" height="105" />
+            <img src={asset("/img/mark.webp")} alt="" width="160" height="105" />
             <span className="brand-name">
               <small>ООО ФИРМА</small>
               <strong>ВИКСЕР</strong>
@@ -458,14 +458,17 @@ function Home() {
 
       <main id="top">
         <section className="hero">
-          <div className="hero-photo" />
+          <div
+            className="hero-photo"
+            style={{ "--hero-image": `url(${asset("/img/hero-night.webp")})` } as CSSProperties}
+          />
           <div className="hero-circuit" />
           <div className="shell hero-inner">
             <div>
               <img
                 className="hero-logo"
-                src="/img/logo-420.webp"
-                srcSet="/img/logo-420.webp 420w, /img/logo.webp 840w"
+                src={asset("/img/logo-420.webp")}
+                srcSet={`${asset("/img/logo-420.webp")} 420w, ${asset("/img/logo.webp")} 840w`}
                 sizes="(max-width: 680px) 74vw, 420px"
                 alt="ООО Фирма ВИКСЕР"
                 width="840"
@@ -682,8 +685,8 @@ function Home() {
               {projects.map((p) => (
                 <article key={p.title} className="project">
                   <img
-                    src={p.image}
-                    srcSet={`${p.image.replace(/\.webp$/, "-560.webp")} 560w, ${p.image} 1000w`}
+                    src={asset(p.image)}
+                    srcSet={`${asset(p.image.replace(/\.webp$/, "-560.webp"))} 560w, ${asset(p.image)} 1000w`}
                     sizes="(max-width: 480px) 92vw, (max-width: 1100px) 45vw, 281px"
                     alt={p.title}
                     width="1000"
@@ -767,7 +770,7 @@ function Home() {
             <p className="lead-note">Левобережный район, индекс 394029.</p>
             <div className="map-frame">
               <img
-                src="/img/map.webp"
+                src={asset("/img/map.webp")}
                 alt="Карта: Ленинский проспект, 3, корпус 2, Воронеж"
                 width="1200"
                 height="700"
@@ -847,7 +850,7 @@ function Home() {
           <div>
             <img
               className="foot-logo"
-              src="/img/logo-420.webp"
+              src={asset("/img/logo-420.webp")}
               alt="ВИКСЕР"
               width="420"
               height="330"
