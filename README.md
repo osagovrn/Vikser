@@ -56,6 +56,36 @@
 
 ## Деплой
 
-Сборка кладёт результат в `.vercel/output` (Nitro, preset `vercel`) — это подходит для Vercel и для любого Node-хостинга.
-Кэширование статики и security-заголовки заданы в `vite.config.ts` (`nitro.routeRules`).
-Для хостинга без Node (обычный виртуальный хостинг с загрузкой файлов по FTP) нужен статический вариант сборки — см. задачу в трекере.
+Сайт собирается в двух вариантах.
+
+**1. Статика для GitHub Pages** (самый дешёвый вариант — хостинг бесплатный):
+
+    npm run build:static      # результат в dist-static/
+
+Сборка кладёт `index.html`, `privacy/index.html`, `404.html`, `robots.txt`, `sitemap.xml`, `.nojekyll`
+и все файлы. Пуш в `main` автоматически собирает и публикует её workflow `.github/workflows/deploy-pages.yml`.
+
+Настройка домена (покупается в любом регистраторе, хостинг не нужен):
+
+1. В репозитории: Settings → Pages → Source = **GitHub Actions**.
+2. Settings → Secrets and variables → Actions → Variables → новая переменная `SITE_URL`
+   со значением `https://ваш-домен.ru` (без слэша на конце). Без неё canonical и sitemap
+   будут указывать на example.com.
+3. Settings → Pages → Custom domain → вписать домен, сохранить.
+4. У регистратора в DNS:
+
+   | Тип | Имя | Значение |
+   |---|---|---|
+   | A | `@` | `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153` |
+   | CNAME | `www` | `osagovrn.github.io` |
+
+5. Через 15 минут–час включить «Enforce HTTPS» в настройках Pages (сертификат Let's Encrypt
+   выпускается автоматически и бесплатно).
+
+Важно: пока домен не привязан, адрес `https://osagovrn.github.io/Vikser/` показывает страницу
+без стилей — сайт собирается для работы в корне домена, а не в подпапке. После привязки домена
+всё работает как надо.
+
+**2. Серверный вариант** — `.vercel/output` (Nitro, preset `vercel`): Vercel или Node-хостинг,
+запуск `node .output/server/index.mjs`. Кэширование статики и security-заголовки заданы
+в `vite.config.ts` (`nitro.routeRules`).
