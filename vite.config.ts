@@ -4,6 +4,14 @@ import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { nitro } from "nitro/vite";
 
+const securityHeaders = {
+  "x-content-type-options": "nosniff",
+  "referrer-policy": "strict-origin-when-cross-origin",
+  "x-frame-options": "SAMEORIGIN",
+  "permissions-policy": "camera=(), microphone=(), geolocation=()",
+  "strict-transport-security": "max-age=31536000; includeSubDomains",
+};
+
 export default defineConfig(({ command, isPreview }) => ({
   server: { host: "0.0.0.0", port: 8080 },
   preview: { host: "127.0.0.1", port: 8081 },
@@ -17,7 +25,13 @@ export default defineConfig(({ command, isPreview }) => ({
             preset: "vercel",
             routeRules: {
               "/img/**": { headers: { "cache-control": "public, max-age=2592000" } },
-              "/fonts/**": { headers: { "cache-control": "public, max-age=31536000, immutable" } },
+              "/fonts/**": {
+                headers: { "cache-control": "public, max-age=31536000, immutable" },
+              },
+              "/assets/**": {
+                headers: { "cache-control": "public, max-age=31536000, immutable" },
+              },
+              "/**": { headers: securityHeaders },
             },
           }),
         ]

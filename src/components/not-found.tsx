@@ -3,6 +3,8 @@ import { Link } from "@tanstack/react-router";
 export function NotFound() {
   return (
     <main className="nf">
+      <title>Страница не найдена — Виксер</title>
+      <meta name="robots" content="noindex" />
       <div className="nf-grid" aria-hidden />
       <div className="nf-scan" aria-hidden />
       <div className="nf-glow" aria-hidden />

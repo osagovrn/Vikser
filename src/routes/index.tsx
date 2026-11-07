@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { Clock, Mail, MapPin, Phone } from "lucide-react";
+import { reachGoal } from "@/lib/analytics";
 import { abs } from "@/lib/site";
 
 const FOUNDED = 1998;
@@ -26,11 +28,17 @@ export const Route = createFileRoute("/")({
           "Слаботочные системы в Воронеже: СОТ, НСС, ОПС, СОУЭ, СКУД, GPON, СКС. Наружка и внутрянка, линии до 220 В.",
       },
       { property: "og:image", content: abs("/og.jpg") },
+      { property: "og:image:type", content: "image/jpeg" },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
       { property: "og:image:alt", content: "ООО «Фирма Виксер», Воронеж" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "ООО «Фирма Виксер» — слаботочные системы, Воронеж" },
+      {
+        name: "twitter:description",
+        content:
+          "Слаботочные системы в Воронеже: СОТ, НСС, ОПС, СОУЭ, СКУД, GPON, СКС. Наружка и внутрянка, линии до 220 В.",
+      },
       { name: "twitter:image", content: abs("/og.jpg") },
       { name: "geo.region", content: "RU-VOR" },
       { name: "geo.placename", content: "Воронеж" },
@@ -53,12 +61,12 @@ const services = [
   },
   {
     title: "Охранно-пожарная сигнализация, ОПС",
-    text: "Совмещённые шлейфы охраны и пожара. Пожарная часть — по лицензии МЧС № 8-Б/03418.",
+    text: "Совмещённые шлейфы охраны и пожара. Пожарная составляющая — по лицензии МЧС № 8-Б/03418.",
     icon: "alarm",
   },
   {
     title: "СОУЭ",
-    text: "Оповещение и управление эвакуацией людей при пожаре: зоны, оповещатели, связь с сигнализацией.",
+    text: "Система оповещения и управления эвакуацией (СОУЭ): зоны, оповещатели, связь с сигнализацией.",
     icon: "horn",
   },
   {
@@ -68,7 +76,7 @@ const services = [
   },
   {
     title: "Охранная сигнализация",
-    text: "Охранные шлейфы отдельно от пожарной части: датчики, приборы, вывод сигнала.",
+    text: "Охранные шлейфы отдельно от пожарных: датчики, приборы, вывод сигнала.",
     icon: "panel",
   },
   {
@@ -111,10 +119,10 @@ const projects: {
   image: string | null;
 }[] = [
   {
-    title: "ОНКО, новый корпус",
+    title: "Онкодиспансер, новый корпус",
     place: "Медицинский объект, Воронеж",
     note: "Слаботочные системы нового корпуса.",
-    tags: "Воронеж",
+    tags: "медицина",
     image: "/img/obj-onko.webp",
   },
   {
@@ -125,7 +133,7 @@ const projects: {
     image: "/img/obj-marriott.webp",
   },
   {
-    title: "Склад",
+    title: "Складской комплекс",
     place: "Складской объект",
     note: "Наружные и внутренние слаботочные линии.",
     tags: "склад",
@@ -135,7 +143,7 @@ const projects: {
     title: "Школа на Шишкова",
     place: "ул. Шишкова, Воронеж",
     note: "Школа №102. Здание строил ДСК.",
-    tags: "школа · ДСК",
+    tags: "образование · ДСК",
     image: "/img/obj-school.webp",
   },
 ];
@@ -297,6 +305,7 @@ function Home() {
   function openQuote(title = "Получить расчёт") {
     setSent(false);
     setDialog(title);
+    reachGoal("open_quote");
   }
 
   const lastOutside = useRef<HTMLElement | null>(null);
@@ -309,6 +318,39 @@ function Home() {
     document.addEventListener("focusin", track);
     return () => document.removeEventListener("focusin", track);
   }, []);
+
+  // Пока открыто модальное окно, страница под ним не прокручивается.
+  useEffect(() => {
+    if (!dialog) return;
+    const { body } = document;
+    const previousOverflow = body.style.overflow;
+    const previousPadding = body.style.paddingRight;
+    const scrollbar = window.innerWidth - document.documentElement.clientWidth;
+    body.style.overflow = "hidden";
+    if (scrollbar > 0) body.style.paddingRight = `${scrollbar}px`;
+    return () => {
+      body.style.overflow = previousOverflow;
+      body.style.paddingRight = previousPadding;
+    };
+  }, [dialog]);
+
+  // Меню закрывается по Escape и по клику вне шапки.
+  useEffect(() => {
+    if (!menu) return;
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") setMenu(false);
+    }
+    function onClick(event: MouseEvent) {
+      const target = event.target as HTMLElement;
+      if (!target.closest(".site-header")) setMenu(false);
+    }
+    window.addEventListener("keydown", onKey);
+    document.addEventListener("click", onClick);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.removeEventListener("click", onClick);
+    };
+  }, [menu]);
 
   useEffect(() => {
     if (!dialog) return;
@@ -345,10 +387,13 @@ function Home() {
 
   return (
     <div>
+      <a className="skip-link" href="#top">
+        Перейти к содержанию
+      </a>
       <header className="site-header">
         <div className="header-row">
           <a className="brand" href="#top">
-            <img src="/img/mark.webp" alt="" />
+            <img src="/img/mark.webp" alt="" width="160" height="105" />
             <span className="brand-name">
               <small>ООО ФИРМА</small>
               <strong>ВИКСЕР</strong>
@@ -364,16 +409,23 @@ function Home() {
             <a href="#contacts">Контакты</a>
           </nav>
           <div className="header-phone">
-            <a href="tel:+74732552825">+7 (473) 255-28-25</a>
+            <a href="tel:+74732552825" onClick={() => reachGoal("phone_click")}>
+              +7 (473) 255-28-25
+            </a>
             <span>г. Воронеж</span>
           </div>
-          <button className="btn" type="button" onClick={() => openQuote()}>
+          <button
+            className="btn header-cta"
+            type="button"
+            onClick={() => openQuote()}
+            aria-haspopup="dialog"
+          >
             Получить расчёт
           </button>
           <button
             className="burger"
             type="button"
-            aria-label="Меню"
+            aria-label={menu ? "Закрыть меню" : "Открыть меню"}
             aria-expanded={menu}
             aria-controls="mobile-nav"
             onClick={() => setMenu((v) => !v)}
@@ -412,13 +464,20 @@ function Home() {
             <div>
               <img
                 className="hero-logo"
-                src="/img/logo.webp"
+                src="/img/logo-420.webp"
+                srcSet="/img/logo-420.webp 420w, /img/logo.webp 840w"
+                sizes="(max-width: 680px) 74vw, 420px"
                 alt="ООО Фирма ВИКСЕР"
                 width="840"
                 height="660"
               />
               <div className="hero-cta">
-                <button className="btn" type="button" onClick={() => openQuote()}>
+                <button
+                  className="btn"
+                  type="button"
+                  onClick={() => openQuote()}
+                  aria-haspopup="dialog"
+                >
                   Получить расчёт →
                 </button>
               </div>
@@ -426,7 +485,7 @@ function Home() {
             <div>
               <h1>
                 Комплексные инженерные системы безопасности для бизнеса
-                <span>Воронеж</span>
+                <span>в Воронеже</span>
               </h1>
               <p className="hero-lead">
                 Монтируем надёжные слаботочные системы в Воронеже: наружные и внутренние линии до
@@ -491,7 +550,7 @@ function Home() {
               </div>
               <div>
                 <dt>Адрес</dt>
-                <dd>394029, Воронежская область, г. Воронеж, пр-кт Ленинский, д. 3, корп. 2.</dd>
+                <dd>394029, Воронежская область, г. Воронеж, пр-т Ленинский, д. 3, корп. 2.</dd>
               </div>
             </dl>
           </div>
@@ -625,6 +684,8 @@ function Home() {
                   {p.image ? (
                     <img
                       src={p.image}
+                      srcSet={`${p.image.replace(/\.webp$/, "-560.webp")} 560w, ${p.image} 1000w`}
+                      sizes="(max-width: 480px) 92vw, (max-width: 1100px) 45vw, 281px"
                       alt={p.title}
                       width="1000"
                       height="640"
@@ -716,11 +777,13 @@ function Home() {
                 alt="Карта: Ленинский проспект, 3, корпус 2, Воронеж"
                 width="1200"
                 height="700"
+                loading="lazy"
+                decoding="async"
               />
               <div className="map-shade" aria-hidden />
               <div className="map-card">
                 <strong>ООО «Фирма Виксер»</strong>
-                <span>пр-кт Ленинский, д. 3, корп. 2</span>
+                <span>пр-т Ленинский, д. 3, корп. 2</span>
                 <span>Воронеж</span>
               </div>
             </div>
@@ -751,7 +814,7 @@ function Home() {
               <div>
                 <dt>Кто получает данные</dt>
                 <dd>
-                  ООО «Фирма Виксер», ИНН 3663000385, пр-кт Ленинский, д. 3, корп. 2, Воронеж.
+                  ООО «Фирма Виксер», ИНН 3663000385, пр-т Ленинский, д. 3, корп. 2, Воронеж.
                 </dd>
               </div>
               <div>
@@ -778,6 +841,9 @@ function Home() {
                 <dd>Третьим лицам не передаём. Исключение — если этого требует закон.</dd>
               </div>
             </dl>
+            <p className="privacy-more">
+              Полный текст — <a href="/privacy">политика обработки персональных данных</a>.
+            </p>
           </div>
         </section>
       </main>
@@ -785,7 +851,13 @@ function Home() {
       <footer className="footer" id="contacts">
         <div className="shell footer-grid">
           <div>
-            <img className="foot-logo" src="/img/logo.webp" alt="ВИКСЕР" width="840" height="660" />
+            <img
+              className="foot-logo"
+              src="/img/logo-420.webp"
+              alt="ВИКСЕР"
+              width="420"
+              height="330"
+            />
             <p>
               Инженерные системы безопасности
               <br />
@@ -822,7 +894,7 @@ function Home() {
                 <a href="#map">Как добраться</a>
               </li>
               <li>
-                <a href="#privacy">Конфиденциальность</a>
+                <a href="/privacy">Политика конфиденциальности</a>
               </li>
               <li>
                 <a href="#contacts">Контакты</a>
@@ -832,23 +904,29 @@ function Home() {
           <div>
             <h2>КОНТАКТЫ</h2>
             <p className="contact-line">
-              <span>◉</span>
-              <span>Юридический: пр-кт Ленинский, д. 3, корп. 2, Воронеж, 394029</span>
+              <MapPin className="contact-icon" aria-hidden />
+              <span>Юридический: пр-т Ленинский, д. 3, корп. 2, Воронеж, 394029</span>
             </p>
             <p className="contact-line">
-              <span>☎</span>
-              <a href="tel:+74732552825">+7 (473) 255-28-25</a>
+              <Phone className="contact-icon" aria-hidden />
+              <a href="tel:+74732552825" onClick={() => reachGoal("phone_click")}>
+                +7 (473) 255-28-25
+              </a>
             </p>
             <p className="contact-line">
-              <span>☎</span>
-              <a href="tel:+74732486720">+7 (473) 248-67-20</a>
+              <Phone className="contact-icon" aria-hidden />
+              <a href="tel:+74732486720" onClick={() => reachGoal("phone_click")}>
+                +7 (473) 248-67-20
+              </a>
             </p>
             <p className="contact-line">
-              <span>✉</span>
-              <a href="mailto:vikser.vrn@ya.ru">vikser.vrn@ya.ru</a>
+              <Mail className="contact-icon" aria-hidden />
+              <a href="mailto:vikser.vrn@ya.ru" onClick={() => reachGoal("email_click")}>
+                vikser.vrn@ya.ru
+              </a>
             </p>
             <p className="contact-line">
-              <span>◷</span>
+              <Clock className="contact-icon" aria-hidden />
               <span>Пн–пт, 8:00–17:00. Спецобъекты — до 19:00 и сб.</span>
             </p>
           </div>
@@ -858,10 +936,24 @@ function Home() {
           </div>
         </div>
         <div className="shell legal">
-          <span>© {YEAR} ООО «Фирма Виксер»</span>
-          <a href="#privacy">Политика конфиденциальности</a>
+          <span suppressHydrationWarning>© {YEAR} ООО «Фирма Виксер»</span>
+          <a href="/privacy">Политика конфиденциальности</a>
         </div>
       </footer>
+
+      <div className="call-bar">
+        <a
+          className="btn btn-solid"
+          href="tel:+74732552825"
+          onClick={() => reachGoal("phone_click")}
+        >
+          <Phone className="contact-icon" aria-hidden />
+          Позвонить
+        </a>
+        <button className="btn" type="button" onClick={() => openQuote()} aria-haspopup="dialog">
+          Получить расчёт
+        </button>
+      </div>
 
       <script
         type="application/ld+json"
@@ -869,16 +961,23 @@ function Home() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "LocalBusiness",
+            "@id": abs("/#organization"),
             name: "ООО «Фирма Виксер»",
             legalName: "Общество с ограниченной ответственностью фирма «Виксер»",
             url: abs("/"),
             image: abs("/og.jpg"),
+            description:
+              "Монтаж слаботочных систем в Воронеже: видеонаблюдение, охранно-пожарная сигнализация, СКУД, СОУЭ, СКС, GPON.",
             taxID: "3663000385",
             email: "vikser.vrn@ya.ru",
-            telephone: ["+7-473-255-28-25", "+7-473-248-67-20"],
+            telephone: "+7-473-255-28-25",
+            foundingDate: "1998-06-15",
+            contactPoint: [
+              { "@type": "ContactPoint", telephone: "+7-473-248-67-20", contactType: "customer service" },
+            ],
             address: {
               "@type": "PostalAddress",
-              streetAddress: "пр-кт Ленинский, д. 3, корп. 2",
+              streetAddress: "пр-т Ленинский, д. 3, корп. 2",
               addressLocality: "Воронеж",
               addressRegion: "Воронежская область",
               postalCode: "394029",
@@ -919,7 +1018,7 @@ function Home() {
           >
             <h3 id="dlg-title">{dialog}</h3>
             {sent ? (
-              <p className="ok">
+              <p className="ok" role="status">
                 Письмо подготовлено. Отправьте его из почты, и мы перезвоним в рабочее время. Если
                 почта не открылась, напишите на vikser.vrn@ya.ru или позвоните +7 (473) 255-28-25.
               </p>
@@ -968,11 +1067,20 @@ function QuoteForm({
         const body = encodeURIComponent(
           `Тема: ${about}\nИмя: ${name}\nТелефон: ${phone}\nПочта: ${email}`,
         );
+        reachGoal("form_submit");
         window.location.href = `mailto:vikser.vrn@ya.ru?subject=${subject}&body=${body}`;
         setDone(true);
         onDone();
       }}
     >
+      <input
+        className="hp"
+        name="company"
+        type="text"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+      />
       <input
         name="name"
         required
@@ -987,6 +1095,8 @@ function QuoteForm({
         inputMode="tel"
         autoComplete="tel"
         required
+        minLength={10}
+        maxLength={30}
         placeholder="Телефон"
         aria-label="Телефон"
       />
@@ -1000,13 +1110,16 @@ function QuoteForm({
       <label className="consent-check">
         <input name="consent" type="checkbox" required />
         <span>
-          Согласен на обработку персональных данных. <a href="#privacy">Как это устроено</a>
+          Согласен на обработку персональных данных согласно{" "}
+          <a href="/privacy" target="_blank" rel="noreferrer">
+            политике
+          </a>
         </span>
       </label>
       {done && compact ? (
-        <p className="ok">
-          Письмо открыто в почтовой программе. Если не открылось, напишите на vikser.vrn@ya.ru или
-          позвоните +7 (473) 255-28-25.
+        <p className="ok" role="status">
+          Открываем почтовую программу с готовым письмом. Если она не открылась, напишите на
+          vikser.vrn@ya.ru или позвоните +7 (473) 255-28-25.
         </p>
       ) : null}
       <button className={compact ? "btn btn-solid" : "btn"} type="submit">

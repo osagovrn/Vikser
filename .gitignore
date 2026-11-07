@@ -9,3 +9,11 @@ dist/
 !.env.example
 *.log
 .DS_Store
+
+# снимки аудита — тяжёлые бинарники, в репозиторий не кладём
+_audit/shots/
+_audit/*.png
+
+# локальные кэши инструментов
+.npm-cache/
+.tmp/
