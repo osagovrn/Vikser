@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { SITE_URL } from "@/lib/site";
+import { originFromRequest } from "@/lib/site";
 
 const PAGES = ["/", "/privacy"];
 const BUILD_DATE = "2026-11-07";
@@ -8,7 +8,7 @@ export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        const origin = SITE_URL || new URL(request.url).origin;
+        const origin = originFromRequest(request);
         const urls = PAGES.map((path) => {
           const priority = path === "/" ? "1.0" : "0.3";
           return `  <url>

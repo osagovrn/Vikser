@@ -116,7 +116,7 @@ const projects: {
   place: string;
   note: string;
   tags: string;
-  image: string | null;
+  image: string;
 }[] = [
   {
     title: "Онкодиспансер, новый корпус",
@@ -681,22 +681,16 @@ function Home() {
             <div className="projects">
               {projects.map((p) => (
                 <article key={p.title} className="project">
-                  {p.image ? (
-                    <img
-                      src={p.image}
-                      srcSet={`${p.image.replace(/\.webp$/, "-560.webp")} 560w, ${p.image} 1000w`}
-                      sizes="(max-width: 480px) 92vw, (max-width: 1100px) 45vw, 281px"
-                      alt={p.title}
-                      width="1000"
-                      height="640"
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  ) : (
-                    <div className="project-ph" aria-hidden>
-                      <Icon name="sks" />
-                    </div>
-                  )}
+                  <img
+                    src={p.image}
+                    srcSet={`${p.image.replace(/\.webp$/, "-560.webp")} 560w, ${p.image} 1000w`}
+                    sizes="(max-width: 480px) 92vw, (max-width: 1100px) 45vw, 281px"
+                    alt={p.title}
+                    width="1000"
+                    height="640"
+                    loading="lazy"
+                    decoding="async"
+                  />
                   <div className="project-body">
                     <h3>{p.title}</h3>
                     <p>

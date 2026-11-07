@@ -725,20 +725,7 @@
   color: inherit;
 }
 
-.consent {
-  margin: 10px auto 0;
-  max-width: 1180px;
-  color: var(--color-dim);
-  font-size: 11px;
-  line-height: 1.45;
-}
-
-.consent a {
-  color: #8b93a3;
-}
-
-.lead-note,
-.stub {
+.lead-note {
   color: var(--color-muted);
   font-size: 14px;
   line-height: 1.55;
@@ -1013,23 +1000,6 @@
 :focus-visible {
   outline: 2px solid var(--color-silver);
   outline-offset: 2px;
-}
-
-.project-ph {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: start end;
-  padding: 18px;
-  color: rgba(210, 224, 255, 0.35);
-  background:
-    radial-gradient(ellipse at 70% 20%, rgba(120, 150, 220, 0.18), transparent 60%),
-    linear-gradient(160deg, #0d111b, #07080d);
-}
-
-.project-ph svg {
-  width: 72px;
-  height: 72px;
 }
 
 .map-attr {
